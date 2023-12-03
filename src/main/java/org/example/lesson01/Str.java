@@ -51,8 +51,10 @@ import java.util.stream.Collectors;
                             genSalary())
             );
 
-            List<String> tmpList = personIDS.stream().map(n ->
-                    n.getDOB()).collect(Collectors.toList());
+            List<String> tmpList = personIDS
+                    .stream()
+                    .map(n -> n.getDOB())
+                    .collect(Collectors.toList());
             System.out.println(tmpList);
         }
         private static int genSalary(){return new Random().nextInt(63758)+16242;}
