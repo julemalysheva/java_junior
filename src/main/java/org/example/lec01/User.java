@@ -1,4 +1,4 @@
-package org.example.lesson01;
+package org.example.lec01;
 
 public class User {
     String name;
