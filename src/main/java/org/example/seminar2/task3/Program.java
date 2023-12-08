@@ -31,6 +31,7 @@ public class Program {
         System.out.println("Insert query: " + queryBuilder.buildInsertQuery(user));
         System.out.println("Select query: " + queryBuilder.buildSelectQuery(Employee.class, pk));
         System.out.println("Update query: " + queryBuilder.buildUpdateQuery(user));
+        System.out.println("Delete query: " + queryBuilder.buildDeleteQuery(Employee.class, pk));
     }
 
 }
