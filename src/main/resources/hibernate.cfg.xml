@@ -17,8 +17,10 @@
         <property name="show_sql">true</property> <!--hibernate.show_sql -->
 <!--        <property name="hibernate.format_sql">true</property>-->
 
-        <!-- Маппинг класса Magic -->
+        <!-- Маппинг класса Magic-->
         <mapping class="org.example.lec04.Magic" />
+        <mapping class="org.example.seminar4.homework_sem4.Course" />
+
 
     </session-factory>
 </hibernate-configuration>
