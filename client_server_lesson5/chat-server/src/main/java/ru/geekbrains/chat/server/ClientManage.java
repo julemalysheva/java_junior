@@ -28,7 +28,8 @@ public class ClientManage implements Runnable {
     /**
      * Закрытие соединения с клиентским сокетом, завершение работы всех потоков,
      * удаление клиентского сокета из коллекции
-     * @param socket клиентский сокет
+     *
+     * @param socket         клиентский сокет
      * @param bufferedReader буфер для чтения данных
      * @param bufferedWriter буфер для отправки данных
      */
@@ -68,8 +69,15 @@ public class ClientManage implements Runnable {
         //Цикл чтения данных от клиента
         while (socket.isConnected()) {
             try {
-            messageFromClient = bufferedReader.readLine();
-            broadcastMessage(messageFromClient);
+                messageFromClient = bufferedReader.readLine();
+
+                // Проверка наличия символа "@" перед получателем
+                String parseMessage = parseMessage(messageFromClient);
+                if (parseMessage.startsWith("@")) {
+                    sendMessageToClient(parseMessage);
+                } else {
+                    broadcastMessage(messageFromClient);
+                }
             } catch (IOException e) {
                 closeEverything(socket, bufferedReader, bufferedWriter);
                 break;
@@ -78,11 +86,59 @@ public class ClientManage implements Runnable {
     }
 
     /**
+     * Метод очищает строку полученного клиентского сообщения от имени отправителя, оставляя только суть самого сообщения
+     * @param messageFromClient строка, содержащее имя отправителя и сообщение
+     * @return сообщение без имени отправителя
+     */
+    private String parseMessage(String messageFromClient) {
+        return messageFromClient.substring(messageFromClient.indexOf(":") + 2).trim();
+    }
+
+    /**
+     * Отправка личного сообщения клиенту
+     *
+     * @param messageFromClient строка, содержащее имя адресата и приватное сообщение
+     */
+    private void sendMessageToClient(String messageFromClient) {
+        // Получение адресата из сообщения (@Имя_адресата сообщение)
+        int index = messageFromClient.indexOf(" ");
+        if (index != -1) {
+            String recipient = messageFromClient.substring(1, index);
+            String privateMessage = messageFromClient.substring(index + 1);
+
+            // Поиск адресата среди клиентов
+            for (ClientManage clientManage : ClientManageSingleton.getInstance()) {
+                try {
+                    //Отправим сообщение, если наименование клиента совпадает с адресатом
+                    if (clientManage.name.equals(recipient)
+                            && !clientManage.name.equals(name)) {
+                        clientManage.bufferedWriter.write("Личное сообщение от " + name + ": " + privateMessage);
+                        clientManage.bufferedWriter.newLine();
+                        clientManage.bufferedWriter.flush();
+                        return;
+                    }
+                } catch (IOException e) {
+                    closeEverything(socket, bufferedReader, bufferedWriter);
+                }
+            }
+            // Если адресат не найден, отправитель получает сообщение об этом
+            try {
+                this.bufferedWriter.write("Участник с именем " + recipient + " не найден.");
+                this.bufferedWriter.newLine();
+                this.bufferedWriter.flush();
+            } catch (IOException e) {
+                closeEverything(socket, bufferedReader, bufferedWriter);
+            }
+        }
+    }
+
+    /**
      * Отправка сообщения всем слушателям
+     *
      * @param message сообщение
      */
     private void broadcastMessage(String message) {
-        for (ClientManage clientManage: ClientManageSingleton.getInstance()) {
+        for (ClientManage clientManage : ClientManageSingleton.getInstance()) {
             try {
                 //Отправим сообщение, если наименование клиента не совпадает с отправителем
                 if (!clientManage.name.equals(name)) {
